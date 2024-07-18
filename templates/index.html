@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KariosChat</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>KariosChat</h1>
+        </div>
+        <div class="chat-box" id="chat-box">
+            <div class="message bot-message">
+                <p>Welcome to KariosChat! How can I help you today?</p>
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Type your message here...">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("send-button").addEventListener("click", function() {
+            sendMessage();
+        });
+
+        document.getElementById("user-input").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                sendMessage();
+            }
+        });
+
+        function sendMessage() {
+            const userInput = document.getElementById("user-input").value;
+            if (userInput.trim() === "") {
+                return;
+            }
+
+            appendMessage("user", userInput);
+            document.getElementById("user-input").value = "";
+
+            fetch("/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    appendMessage("bot", data.message);
+                } else {
+                    appendMessage("bot", "Sorry, there was an error processing your request.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                appendMessage("bot", "Sorry, there was an error processing your request.");
+            });
+        }
+
+        function appendMessage(sender, message) {
+            const messageElement = document.createElement("div");
+            messageElement.classList.add("message", `${sender}-message`);
+            messageElement.innerHTML = `<p>${message}</p>`;
+            document.getElementById("chat-box").appendChild(messageElement);
+            document.getElementById("chat-box").scrollTop = document.getElementById("chat-box").scrollHeight;
+        }
+    </script>
+</body>
+</html>

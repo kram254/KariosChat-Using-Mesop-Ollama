@@ -1,0 +1,4 @@
+mesop
+ollama
+groq
+python-dotenv
